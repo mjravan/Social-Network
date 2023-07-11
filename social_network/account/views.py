@@ -12,7 +12,7 @@ class UserRegisterView(View):
     form_class = UserRegistrationForm
     template_name = 'account/register.html'
 
-    # dispatch methods activates before any methods
+    # dispatch method activates before any methods
     def dispatch(self, request, *args, **kwargs):
         if request.user.is_authenticated:
             return redirect('home:home')
