@@ -12,10 +12,18 @@ django and  has many features which used in real websites!
 - Checking Profile, Follow & Unfollow features 
 ---
 # Instructions
-### 1. Installing Dependency's:<br>
-`pip install -r requirements.txt`
-
+### 1. Installing Dependency's:
+```bash
+pip install -r requirements.txt
+```
 ---
-### 2. Running Project:<br>
-`python manage.py runserver`<br>
-then search `localhost:8000` in browser
+### 2. Running Project:
+### If first run:
+```bash
+python manage.py migrate
+```
+### then
+```bash
+python manage.py runserver
+```
+finally search `localhost:8000` in browser
