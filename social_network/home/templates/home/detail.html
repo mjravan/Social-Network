@@ -6,5 +6,26 @@
         <a href="{% url 'home:post_update' post.id %}" class="btn btn-info">Update</a>
     {% endif %}
     <p><a href="{% url 'account:user_profile' post.user.id %}"> {{ post.user.username }} </a>- {{ post.updated|date:"d-M-Y"}} </p>
-    <p> {{ post.body }} </p>
+    <p> {{ post.body }} </p> <hr/>
+    
+    {% if request.user.is_authenticated %}
+        <form action="" method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <input type="submit" value="Send">
+        </form>
+    {% else %}
+        <p class="alert alert-danger"> Only logged-in users can comment </p>
+    {% endif %} 
+
+    <p> {{ comments.count }} comments </p>
+    {% for comment in comments %}
+        <div class="card bg-dark text-white">
+            <p class="card-header"> {{ comment.user }} | {{ comment.created|timesince }} </p>
+            <p class="card-body"> {{ comment.body }} </p>
+        </div>
+    {% empty %}
+        <p> No comments yet! :\ </p>
+    {% endfor %}
+
 {% endblock %}
