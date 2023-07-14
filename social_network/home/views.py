@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views import View
-from .models import Post, Comment
+from .models import Post, Comment, Vote
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
 from .forms import PostCreateUpdateForm, CommentCreateForm, CommentReplyForm
@@ -25,9 +25,12 @@ class PostDetailView(View):
 
     def get(self, request, *args, **kwargs):
         comments = self.post_instance.pcomments.filter(is_reply=False)
+        is_liked = False
+        if request.user.is_authenticated and self.post_instance.user_liked(request.user):
+            is_liked = True
         return render(request, 'home/detail.html', {
             'post': self.post_instance, 'comments': comments, 'form': self.form_class,
-            'reply_form': self.form_class_reply})
+            'reply_form': self.form_class_reply, 'is_liked': is_liked})
 
     # submitting a comment
     @method_decorator(login_required)
@@ -101,7 +104,7 @@ class PostCreateView(LoginRequiredMixin, View):
             return redirect('home:post_detail', new_post.id, new_post.slug)
 
 
-class PostAddReplyView(View):
+class PostAddReplyView(LoginRequiredMixin, View):
     form_class = CommentCreateForm
 
     def post(self, request, post_id, comment_id):
@@ -117,3 +120,15 @@ class PostAddReplyView(View):
             reply.save()
             messages.success(request, 'your reply submitted successfully', 'success')
             return redirect('home:post_detail', post.id, post.slug)
+
+
+class PostLikeView(LoginRequiredMixin, View):
+    def get(self, request, *args, **kwargs):
+        post = get_object_or_404(Post, id=kwargs['post_id'])
+        like = Vote.objects.filter(post=post, user=request.user)
+        if like.exists():
+            messages.error(request, 'you have already liked this post :/', 'danger')
+        else:
+            Vote(post=post, user=request.user).save()
+            messages.success(request, 'you liked this post  :)', 'success')
+        return redirect('home:post_detail', post.id, post.slug)
